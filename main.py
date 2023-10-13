@@ -204,6 +204,19 @@ class Troll(Monster):
     print(self.monster_type, ' attacks for ', damage, ' damage.')
     return damage
 
+class Dragon(Monster):
+  
+  def __init__(self, level):
+    Monster.__init__(self, level)
+  
+    self.monster_type = 'Dragon'
+  
+    self.hp = self.max_hp = self.level * 25
+    self.min_damage = self.level + 2
+    self.max_damage = self.level * 5
+  
+    self.xp_value = 100 + self.level * 20
+    
 class Battle:
 
   def __init__(self, player):
@@ -215,7 +228,7 @@ class Battle:
 
     self.xp_value = 0
 
-    monster_types = ['Skeleton', 'Troll']
+    monster_types = ['Skeleton', 'Troll', 'Dragon']
 
     for i in range(self.difficulty):
       monster_choice = random.choice(monster_types)
@@ -224,6 +237,9 @@ class Battle:
         self.monster_list.append(Skeleton(self.player.level))
       elif monster_choice == 'Troll':
         self.monster_list.append(Troll(self.player.level))
+      elif monster_choice == 'Dragon':
+        self.monster_list.append(Dragon(self.player.level))
+     
 
       self.xp_value += self.monster_list[i].xp_value
 
@@ -415,6 +431,7 @@ player = Player(player_name)
 
 print()
 print('Good luck noble', player_name, '. Everyone is counting on you!')
+print("Ready for the fight?")
 
 input('Press enter to enter the dungeon.')
 
