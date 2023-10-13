@@ -81,9 +81,8 @@ class Player:
     self.weapon.print_stats()
     self.armor.print_stats()
     print()
-    
 
-
+ 
 
 class Item:
   item_type = None
@@ -163,7 +162,18 @@ class Monster:
       print('HP: ', self.hp, ' / ', self.max_hp)
     else:
       print('*Dead*')
-    
+
+  def befriend(self, player):
+    if random.randint(1,10) >= 8:
+      print("You befriended a monster!")
+      self.xp_value = 100 + self.level * 20 
+      player.xp_gain(self)
+      print('You have gained  xp!')
+    elif random.randint(1,10) <= 7:
+      print("The monster doesn't like you...")
+      player.take_hit(self)
+      print("the monster attacks")
+
 
 class Skeleton(Monster):
 
