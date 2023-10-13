@@ -81,8 +81,6 @@ class Player:
     self.weapon.print_stats()
     self.armor.print_stats()
     print()
-    
-
 
 
 class Item:
@@ -93,6 +91,7 @@ class Item:
 
   def print_stats(self):
     print(self.item_type, '- level: ', self.item_level)
+
 
 class Weapon(Item):
 
@@ -115,6 +114,7 @@ class Weapon(Item):
   def print_stats(self):
     Item.print_stats(self)
     print(self.weapon_type, ' damage: ', self.min_damage, ' - ', self.max_damage)
+
 
 class Armor(Item):
 
@@ -163,7 +163,7 @@ class Monster:
       print('HP: ', self.hp, ' / ', self.max_hp)
     else:
       print('*Dead*')
-    
+
 
 class Skeleton(Monster):
 
@@ -177,6 +177,7 @@ class Skeleton(Monster):
     self.max_damage = self.level * 3
 
     self.xp_value = 100 + self.level * 20
+
 
 class Troll(Monster):
 
@@ -203,6 +204,7 @@ class Troll(Monster):
 
     print(self.monster_type, ' attacks for ', damage, ' damage.')
     return damage
+
 
 class Battle:
 
@@ -406,7 +408,6 @@ class Battle:
 
         break #gevecht is voorbij
         
-
 
 
 player_name = input('What is your name, noble hero?')
