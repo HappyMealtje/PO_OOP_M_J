@@ -167,14 +167,13 @@ class Monster:
 
 
   def befriend(self, player):
-    if random.randint(1,10) >= 8:
+    if random.randint(1,10) >= 9:
       print("You befriended a monster!")
       self.xp_value = 100 + self.level * 20 
-      player.xp_gain(self)
-      print('You have gained  xp!')
-    elif random.randint(1,10) <= 7:
+      player.xp_gain(self.xp_value)
+    elif random.randint(1,10) <= 8:
       print("The monster doesn't like you...")
-      player.take_hit(self)
+      player.take_hit( self.attack() )
       print("the monster attacks")
 
 
@@ -328,24 +327,29 @@ class Battle:
         monster_damage = monster.attack()
         self.player.take_hit(monster_damage)
 
-  def player_attack(self):
-    #de player valt de monsters aan
-
-    #zijn er meerdere monsters
+  def choose_monster(self):
     if len(self.monster_list) > 1:
       max_target = len(self.monster_list)
       target = -1
       while target < 1 or target > max_target:
-        target = int(input('Which monster would you like to attack? (1 - '+ str(max_target) +  ')'))
+        target = int(input('Which monster would you like to befriend? (1 - '+ str(max_target) +  ')'))
       target -= 1
     else:
       # er is maar 1 monster
       target = 0
+    return self.monster_list[target]
+    
+  
+  def player_attack(self):
+    #de player valt de monsters aan
 
+    #zijn er meerdere monsters
+    monster = self.choose_monster()
+    
     #damage aan de monster geven
     player_damage = self.player.attack()
-    if self.monster_list[target].hp > 0:
-      self.monster_list[target].take_hit(player_damage)
+    if monster.hp > 0:
+      monster.take_hit(player_damage)
     else:
       print('You hit a dead monster. it is still dead...')
 
@@ -381,8 +385,8 @@ class Battle:
       self.battle_stats()
       
       player_action = ''
-      while player_action not in [ 'S', 'F', 'H', 'R', 'Q' ]:
-        player_action = input('What will you do? (S)ats, (F)ight, (H)eal, (R)un, (Q)uit').upper()
+      while player_action not in [ 'S', 'F', 'H', 'R', "B",'Q' ]:
+        player_action = input('What will you do? (S)ats, (F)ight, (H)eal, (R)un,(B)efriend, (Q)uit').upper()
 
       if player_action == 'S':
         self.player.print_stats()
@@ -427,6 +431,12 @@ class Battle:
 
         else:
           self.monster_attack()
+
+      elif player_action == "B":
+        #speler wil een monster bevrienden
+        monster = self.choose_monster()
+        monster.befriend(player)
+
 
       elif player_action == 'Q': 
         #speler geeft het op
