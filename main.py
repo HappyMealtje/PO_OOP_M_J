@@ -171,10 +171,12 @@ class Monster:
       print("You befriended a monster!")
       self.xp_value = 100 + self.level * 20 
       player.xp_gain(self.xp_value)
+      return True
     elif random.randint(1,10) <= 8:
       print("The monster doesn't like you...")
       player.take_hit( self.attack() )
       print("the monster attacks")
+      return False
 
 
 
@@ -220,7 +222,8 @@ class Troll(Monster):
 
 
 class Dragon(Monster):
-  
+  catchable = True
+
   def __init__(self, level):
     Monster.__init__(self, level)
   
@@ -231,7 +234,13 @@ class Dragon(Monster):
     self.max_damage = self.level * 5
   
     self.xp_value = 100 + self.level * 20
-    
+
+  def befriend(self, player):
+    if self.catchable:
+        print("You can't befriend a Dragon, but you can try to catch it!")
+        return False
+    else:
+        print()
 
 class Battle:
 
@@ -262,10 +271,11 @@ class Battle:
   def battle_stats(self):
     print('You are fighting:')
 
-    for i in range(self.difficulty):
-      print('Enemy', i+1)
-      self.monster_list[i].print_stats()
-      print()
+    for i in range(len(self.monster_list)):
+        print('Enemy', i+1)
+        self.monster_list[i].print_stats()
+    
+        print()
 
     print('-----------------------------')
     print()
@@ -335,11 +345,27 @@ class Battle:
         target = int(input('Which monster would you like to befriend? (1 - '+ str(max_target) +  ')'))
       target -= 1
     else:
-      # er is maar 1 monster
+      #er is maar 1 monster
       target = 0
     return self.monster_list[target]
     
-  
+  def catch_dragon(self):
+        # speler wil een draak vangen
+        for monster in self.monster_list:
+            if isinstance(monster, Dragon) and monster.hp > 0:
+                # check of het monster een draak is en of het leeft
+                catch_chance = random.randint(1, 100)
+                if catch_chance >= 30:
+                    print("You successfully caught the Dragon!")
+                    self.player.xp_gain(monster.xp_value)
+                    self.monster_list.remove(monster)
+                    return True
+                else:
+                    print("You failed to catch the Dragon.")
+                    return False
+        print("There are no Dragons to catch.")
+        return False
+    
   def player_attack(self):
     #de player valt de monsters aan
 
@@ -380,13 +406,14 @@ class Battle:
 
     #de loop die gevechtsrondes organiseert
     while True:
+      
       print()
       print('#### BATTLE ROUND ####')
       self.battle_stats()
-      
+        
       player_action = ''
-      while player_action not in [ 'S', 'F', 'H', 'R', "B",'Q' ]:
-        player_action = input('What will you do? (S)ats, (F)ight, (H)eal, (R)un,(B)efriend, (Q)uit').upper()
+      while player_action not in [ 'S', 'F', 'H', 'R', "B", 'C', 'Q' ]:
+        player_action = input('What will you do? (S)ats, (F)ight, (H)eal, (R)un,(B)efriend, (C)atch, (Q)uit').upper()
 
       if player_action == 'S':
         self.player.print_stats()
@@ -435,8 +462,30 @@ class Battle:
       elif player_action == "B":
         #speler wil een monster bevrienden
         monster = self.choose_monster()
-        monster.befriend(player)
+        if monster.befriend(player) == True:
+          monsters_alive = 0
+          self.monster_list.remove(monster)
+          for monster in self.monster_list:
+            if monster.hp > 0:
+              monsters_alive += 1
 
+          #zijn er nog monsters over?
+          if monsters_alive > 0:
+            self.monster_attack()
+          else:
+            #alle monsters zijn dood. hoera
+            print('-------------------------')
+            print('YOU WON THE BATTLE!!')
+            print('-------------------------')
+            break
+        else:
+          print('You could not befriend the monster.')
+
+      elif player_action == 'C':
+      # speler wil een draak vangen
+        if not self.catch_dragon():
+          # Batlle gaat door als de draak niet gevangen is
+          self.monster_attack()
 
       elif player_action == 'Q': 
         #speler geeft het op
@@ -448,7 +497,10 @@ class Battle:
         print('YOU HAVE DIED!!')
 
         break #gevecht is voorbij
-        
+
+  
+
+
 
 
 player_name = input('What is your name, noble hero?')
