@@ -1,12 +1,14 @@
 import random
 
 class Player:
+  #begin/basis waarden
   level = 1
   xp = 0
   next_level_xp = 500
   hp = 50
   max_hp = 50
-
+  
+#speler 
   def __init__(self, name):
     self.name = name
     
@@ -20,6 +22,7 @@ class Player:
     print(self.name, 'attacks with a ', self.weapon.weapon_type, ' for ', damage, ' damage.')
     return damage
 
+  #speler krijgt damage of niet
   def take_hit(self, damage):
     final_damage = damage - self.armor.defence
     if final_damage > 0:
@@ -35,7 +38,7 @@ class Player:
     else:
       print('Your shiny armor protects you, you take 0 damage.')
     
-
+#healen van de speler 
   def heal(self, heal_amount):
     self.hp += heal_amount
 
@@ -70,7 +73,7 @@ class Player:
     elif item.item_type == 'Armor':
       self.armor = item
 
-    #laat even zien hoe de player
+    #laat even zien hoe de player ervoor staat
     self.print_stats()
 
   def print_stats(self):
@@ -84,10 +87,12 @@ class Player:
     self.armor.print_stats()
     print()
 
+  #inventory
   def addtoInventory(self, item):
     self.inventory.append(item)
 
 class World:
+  #waar de speler kan zijn(plekken)
    def __init__(self):
        places = {
          'Grassfield': {
@@ -139,7 +144,7 @@ class World:
            }
          }
        }
-
+#waar de speler is
        self.world = {place_name: Place(place_name, place_data['directions']) for place_name, place_data in places.items()}
        self.current_place = self.world['Grassfield']
 
@@ -244,7 +249,7 @@ class Monster:
     else:
       print('*Dead*')
 
-
+#monsters proberen te bevrienden
   def befriend(self, player):
     if random.randint(1,10) >= 7:
       print("You befriended a monster!")
@@ -290,7 +295,7 @@ class Troll(Monster):
   def attack(self):
     damage = random.randint(self.min_damage, self.max_damage)
 
-    #cratical hit
+    #critical hit
     if random.randint(1, 100) <= self.crit_chance:
       print(self.monster_type, ' makes a critical hit!')
       damage *= 2
@@ -312,7 +317,7 @@ class Dragon(Monster):
     self.max_damage = self.level * 5
   
     self.xp_value = 100 + self.level * 20
-
+#je kan een draak niet bevrienden
   def befriend(self, player):
     if self.catchable:
         print("You can't befriend a Dragon, but you can try to catch it!")
@@ -632,7 +637,7 @@ class Battle:
 
 
 
-
+#beginscherm
 player_name = input('What is your name, noble hero?')
 
 player = Player(player_name)
