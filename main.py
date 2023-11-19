@@ -167,12 +167,12 @@ class Monster:
 
 
   def befriend(self, player):
-    if random.randint(1,10) >= 9:
+    if random.randint(1,10) >= 7:
       print("You befriended a monster!")
-      self.xp_value = 100 + self.level * 20 
+      self.xp_value = 20 + self.level * 20 
       player.xp_gain(self.xp_value)
       return True
-    elif random.randint(1,10) <= 8:
+    elif random.randint(1,10) <= 6:
       print("The monster doesn't like you...")
       player.take_hit( self.attack() )
       print("the monster attacks")
@@ -355,7 +355,7 @@ class Battle:
             if isinstance(monster, Dragon) and monster.hp > 0:
                 # check of het monster een draak is en of het leeft
                 catch_chance = random.randint(1, 100)
-                if catch_chance >= 30:
+                if catch_chance >= 85:
                     print("You successfully caught the Dragon!")
                     self.player.xp_gain(monster.xp_value)
                     self.monster_list.remove(monster)
