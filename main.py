@@ -12,6 +12,8 @@ class Player:
     
     self.weapon = Weapon(1)
     self.armor = Armor(1)
+
+    self.inventory = [self.weapon, self.armor]
   
   def attack(self):
     damage = self.level + random.randint(self.weapon.min_damage, self.weapon.max_damage)
@@ -82,7 +84,84 @@ class Player:
     self.armor.print_stats()
     print()
 
- 
+  def addtoInventory(self, item):
+    self.inventory.append(item)
+
+class World:
+   def __init__(self):
+       places = {
+         'Grassfield': {
+           'directions' : {
+             'left' : 'Shed',
+             'right' : 'Pier',
+             'up' : 'Townsquare'
+           }
+         },
+         'Shed': {
+           'directions' : {
+             'right' : 'Grassfield',
+             'up' : 'Forest'
+           }
+         },
+         'Forest': {
+           'directions' : {
+             'right' : 'Townsquare',
+             'down' : 'Shed'
+           }
+         },
+         'Pier': {
+           'directions' : {
+             'left' : 'Grassfield'
+           }
+         },
+         'Townsquare': {
+           'directions' : {
+             'left' : 'Forest',
+             'right' : 'Bakery',
+             'up' : 'Townhall',
+             'down' : 'Grassfield'
+           }
+         },
+         'Townhall': {
+           'directions' : {
+             'down' : 'Townsquare'
+           }
+         },
+         'Bakery': {
+           'directions' : {
+             'left' : 'Townsquare',
+             'up' : 'Shop'
+           }
+         },
+         'Shop': {
+           'directions' : {
+             'down' : 'Bakery'
+           }
+         }
+       }
+
+       self.world = {place_name: Place(place_name, place_data['directions']) for place_name, place_data in places.items()}
+       self.current_place = self.world['Grassfield']
+
+
+class Place:
+
+  def __init__(self, name, directions = None ):
+    self.name = name
+    self.directions = directions if directions is not None else {}
+
+  def print_stats(self):
+    print(world.current_place.name)
+  
+    if self.directions:
+      for direction, place_name in self.directions.items():
+        print(f"{direction}: {place_name}")
+
+
+world = World()
+
+world.current_place = world.current_place
+
 
 class Item:
   item_type = None
@@ -179,7 +258,6 @@ class Monster:
       return False
 
 
-
 class Skeleton(Monster):
 
   def __init__(self, level):
@@ -242,6 +320,7 @@ class Dragon(Monster):
     else:
         print()
 
+
 class Battle:
 
   def __init__(self, player):
@@ -252,6 +331,8 @@ class Battle:
     self.monster_list = []
 
     self.xp_value = 0
+
+    self.world = world #link naar de wereld
 
     monster_types = ['Skeleton', 'Troll', 'Dragon']
 
@@ -320,14 +401,19 @@ class Battle:
       choice = choice.lower()
 
       if choice == 'n':
-        print('You leave the item on the ground and move on...')
+        answer = input('Do you at least want to take it with you? (Y/N)')
+        answer = answer.lower()
+        if answer == 'y':
+          player.addtoInventory(item)
+        else:
+          print('Now you defenitely leave it behind, to be gone forever!')
       else:
         self.player.equip_item(item)
         print('You equip the new item.')
     else:
       #geen loot
       print('you look real hard, but the monsters dropped no items.')
-      
+
 
   def monster_attack(self):
     #monsters vallen de speler aan
@@ -400,25 +486,57 @@ class Battle:
     print('You give up.')
     self.player.hp = 0
 
+  def walk(self, direction):
+     if direction in self.current_place.directions:
+       self.current_place = self.current_place.directions[direction]
+       print('You walk to the ' + self.current_place)
+     else:
+       print('You cannot go there')
+
+  def equip(self):
+    print('So you want to equip something from your inventory?')
+    print('Then this is the right address.')
+    print('You have these items')
+    for item in player.inventory:
+      print(item)
+
+    choice_item = int(input('Which one? (1, 2, 3 ...'))
+    if choice_item > len(player.inventory):
+      item = player.inventory[choice_item - 1] #om de juiste plek in de lijst te krijgen
+      self.player.equip(item)
+      player.inventory.remove(item)
+  
+  
   def fight_battle(self):
     print()
     print('You encounter some monsters')
 
     #de loop die gevechtsrondes organiseert
     while True:
-      
+
+      print()
+      try:
+        print('You are at the ' + world.current_place.name)
+      except:
+        print('You are at the ' + world.current_place)
+      print()
+      for i in world.current_place.directions:
+        print(i + ' : ' + world.current_place.directions[i])
       print()
       print('#### BATTLE ROUND ####')
       self.battle_stats()
         
       player_action = ''
-      while player_action not in [ 'S', 'F', 'H', 'R', "B", 'C', 'Q' ]:
-        player_action = input('What will you do? (S)ats, (F)ight, (H)eal, (R)un,(B)efriend, (C)atch, (Q)uit').upper()
+      
+      while player_action not in [ 'S', 'F', 'H', 'R', "B", 'C', 'Q', 'W', 'E' ]:
+        player_action = input('What will you do? (S)ats, (F)ight, (H)eal, (R)un,(B)efriend, (C)atch, (Q)uit, (W)alk direction, (E)quip').upper()
+        player_action = player_action.split(' ', 2)
 
-      if player_action == 'S':
+      if player_action[0] == 'S':
         self.player.print_stats()
         input('Press enter to continue to fight')
-      elif player_action == 'F':
+      
+      elif player_action[0] == 'F':
         #speler wil aanvallen
         self.player_attack()
 
@@ -445,12 +563,12 @@ class Battle:
           #onderbreek het gevecht
           break
 
-      elif player_action == 'H':
+      elif player_action[0] == 'H':
         self.player_heal()
         print()
         self.monster_attack()
 
-      elif player_action == 'R':
+      elif player_action[0] == 'R':
         #player probeert weg te rennen
         if self.player_run() == True:
           #het is gelukt
@@ -459,7 +577,7 @@ class Battle:
         else:
           self.monster_attack()
 
-      elif player_action == "B":
+      elif player_action[0] == "B":
         #speler wil een monster bevrienden
         monster = self.choose_monster()
         if monster.befriend(player) == True:
@@ -481,17 +599,29 @@ class Battle:
         else:
           print('You could not befriend the monster.')
 
-      elif player_action == 'C':
+      elif player_action[0] == 'C':
       # speler wil een draak vangen
         if not self.catch_dragon():
           # Batlle gaat door als de draak niet gevangen is
           self.monster_attack()
 
-      elif player_action == 'Q': 
+      elif player_action[0] == 'Q': 
         #speler geeft het op
         self.player_quit()
         break #gevecht is voorbij
 
+      elif player_action[0] == 'W':
+        #je wilt naar een andere plek lopen
+        self.walk(player_action[1])
+        print('a')
+        try:
+          print('You are at the ' + world.current_place.name)
+        except:
+          print('You are at the ' + world.current_place)
+
+      elif player_action[0] == 'E':
+        self.equip()
+      
       #is de player dood?
       if self.player.hp <= 0:
         print('YOU HAVE DIED!!')
